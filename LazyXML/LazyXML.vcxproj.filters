@@ -8,6 +8,7 @@
   <ItemGroup>
     <ClInclude Include="LazyXML.h" />
     <ClInclude Include="tinyxml2.h" />
+    <ClInclude Include="LazyXML_VarTable.h" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="test_config.xml" />
