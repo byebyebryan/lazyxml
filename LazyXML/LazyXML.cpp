@@ -70,5 +70,3 @@ bool LazyXML::LazyXMLBase::writeToFile(const std::string & fileName)
 	fileStream << buffer;
 	return true;
 }
-
-//#include "tinyxml2.cpp"

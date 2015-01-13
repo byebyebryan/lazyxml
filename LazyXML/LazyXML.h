@@ -12,7 +12,6 @@
 
 namespace LazyXML
 {
-
 	class LazyXMLBase
 	{
 
@@ -30,7 +29,9 @@ namespace LazyXML
 		static std::map<std::string, std::function<void(tinyxml2::XMLElement *)>> writingFuncs;
 		
 	public:
+
 		bool init();
+
 		bool readFromFile(const std::string & fileName);
 		bool readFromBuffer(const std::string & buffer);
 		

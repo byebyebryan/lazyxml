@@ -7,5 +7,3 @@ LAZY_XML_VAR(int, TestVar1)
 LAZY_XML_VAR(float, TestVar2)
 LAZY_XML_VAR(double, TestVar3)
 LAZY_XML_VAR(std::vector<int>, TestVar4)
-
-
