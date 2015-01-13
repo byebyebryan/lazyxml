@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+	<TestVar0>false</TestVar0>
+	<TestVar1>50</TestVar1>
+	<TestVar2>5.2</TestVar2>
+	<TestVar3>6.4</TestVar3>
+	<TestVar4>
+		<item>3</item>
+		<item>4</item>
+	</TestVar4>
+</config>
