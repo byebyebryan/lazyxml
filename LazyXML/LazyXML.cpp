@@ -2,30 +2,27 @@
 
 using namespace tinyxml2;
 
-std::map<std::string, std::function<void(XMLElement *)>> LazyXML::LazyXMLBase::readingFuncs;
-std::map<std::string, std::function<void(XMLElement *)>> LazyXML::LazyXMLBase::writingFuncs;
+std::map<std::string, std::function<void(tinyxml2::XMLElement *)>> LazyXML::Base::readingFuncs;
+std::map<std::string, std::function<void(tinyxml2::XMLElement *)>> LazyXML::Base::writingFuncs;
 
-bool LazyXML::LazyXMLBase::init()
+void LazyXML::Base::init()
 {
 #define LAZY_XML_VAR(varType, varName) \
-	readingFuncs[#varName] = std::bind(&LazyVarType<varType>::reader, std::placeholders::_1, &varName); \
-	writingFuncs[#varName] = std::bind(&LazyVarType<varType>::writer, std::placeholders::_1, #varName, std::cref(varName));
-
-#include "LazyXML_VarTable.h"
-
+	readingFuncs[#varName] = std::bind(&VarType<varType>::reader, std::placeholders::_1, &varName); \
+	writingFuncs[#varName] = std::bind(&VarType<varType>::writer, std::placeholders::_1, #varName, std::cref(varName));
+#include VAR_TABLE_FILE
 #undef LAZY_XML_VAR
-	return true;
 }
 
-bool LazyXML::LazyXMLBase::readFromFile(const std::string & fileName)
+void LazyXML::Base::readFromFile(const std::string & fileName)
 {
 	std::ifstream fileStream(fileName);
 	std::stringstream stringBuffer;
 	stringBuffer << fileStream.rdbuf();
-	return readFromBuffer(stringBuffer.str());
+	readFromBuffer(stringBuffer.str());
 }
 
-bool LazyXML::LazyXMLBase::readFromBuffer(const std::string & buffer)
+void LazyXML::Base::readFromBuffer(const std::string & buffer)
 {
 	XMLDocument * xmlDoc = new XMLDocument();
 	xmlDoc->Parse(buffer.c_str());
@@ -40,10 +37,9 @@ bool LazyXML::LazyXMLBase::readFromBuffer(const std::string & buffer)
 		xmlNode = xmlNode->NextSiblingElement();
 	}
 	delete xmlDoc;
-	return true;
 }
 
-bool LazyXML::LazyXMLBase::writeToBuffer(std::string & buffer)
+void LazyXML::Base::writeToBuffer(std::string & buffer)
 {
 	XMLDocument * xmlDoc = new XMLDocument();
 	XMLDeclaration * xmlDecl = xmlDoc->NewDeclaration();
@@ -59,14 +55,14 @@ bool LazyXML::LazyXMLBase::writeToBuffer(std::string & buffer)
 	XMLPrinter xmlPrinter;
 	xmlDoc->Print(&xmlPrinter);
 	buffer = std::string(xmlPrinter.CStr());
-	return true;
 }
 
-bool LazyXML::LazyXMLBase::writeToFile(const std::string & fileName)
+void LazyXML::Base::writeToFile(const std::string & fileName)
 {
 	std::string buffer;
 	writeToBuffer(buffer);
 	std::ofstream fileStream(fileName);
 	fileStream << buffer;
-	return true;
 }
+
+LazyXML::Singleton * LazyXML::Singleton::instance = nullptr;

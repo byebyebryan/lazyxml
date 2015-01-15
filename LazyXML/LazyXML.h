@@ -10,18 +10,18 @@
 #include <assert.h>
 #include "tinyxml2.h"
 
+#define VAR_TABLE_FILE "LazyXML_VarTable.h"
+
 namespace LazyXML
 {
-	class LazyXMLBase
+	class Base
 	{
 
 #define LAZY_XML_VAR(varType, varName) \
 	private: varType varName; \
 	public: const varType & get_##varName() const {return varName;} \
 	void set_##varName(const varType & value) {varName = value;}
-
-#include "LazyXML_VarTable.h"
-
+#include VAR_TABLE_FILE
 #undef LAZY_XML_VAR
 
 	private:
@@ -29,18 +29,33 @@ namespace LazyXML
 		static std::map<std::string, std::function<void(tinyxml2::XMLElement *)>> writingFuncs;
 		
 	public:
+		void init();
 
-		bool init();
-
-		bool readFromFile(const std::string & fileName);
-		bool readFromBuffer(const std::string & buffer);
+		void readFromFile(const std::string & fileName);
+		void readFromBuffer(const std::string & buffer);
 		
-		bool writeToBuffer(std::string & buffer);
-		bool writeToFile(const std::string & fileName);
+		void writeToBuffer(std::string & buffer);
+		void writeToFile(const std::string & fileName);
+	};
+
+	class Singleton : public Base
+	{
+		Singleton() {}
+		static Singleton * instance;
+	public:
+		static Singleton * getInstance()
+		{
+			if (!instance)
+			{
+				instance = new Singleton();
+				instance->init();
+			}
+			return instance;
+		}
 	};
 
 	template<typename T>
-	struct LazyVarType
+	struct VarType
 	{
 		static void reader(tinyxml2::XMLElement * xmlElement, T & value)
 		{
@@ -56,7 +71,7 @@ namespace LazyXML
 	};
 
 	template<typename T>
-	struct LazyVarType < std::vector<T> >
+	struct VarType < std::vector<T> >
 	{
 		static void reader(tinyxml2::XMLElement * xmlElement, std::vector<T> * value)
 		{
@@ -64,7 +79,7 @@ namespace LazyXML
 			while (childElement)
 			{
 				T childValue;
-				LazyVarType<T>::reader(childElement, &childValue);
+				VarType<T>::reader(childElement, &childValue);
 				value->push_back(childValue);
 				childElement = childElement->NextSiblingElement();
 			}
@@ -75,14 +90,14 @@ namespace LazyXML
 			tinyxml2::XMLElement * newElement = xmlElement->GetDocument()->NewElement(name.c_str());
 			for (auto & item : value)
 			{
-				LazyVarType<T>::writer(newElement, "item", item);
+				VarType<T>::writer(newElement, "item", item);
 			}
 			xmlElement->InsertEndChild(newElement);
 		}
 	};
 
 	template<>
-	struct LazyVarType < bool >
+	struct VarType < bool >
 	{
 		static void reader(tinyxml2::XMLElement * xmlElement, bool * value)
 		{
@@ -98,7 +113,7 @@ namespace LazyXML
 	};
 
 	template<>
-	struct LazyVarType < int >
+	struct VarType < int >
 	{
 		static void reader(tinyxml2::XMLElement * xmlElement, int * value)
 		{
@@ -114,7 +129,7 @@ namespace LazyXML
 	};
 
 	template<>
-	struct LazyVarType < float >
+	struct VarType < float >
 	{
 		static void reader(tinyxml2::XMLElement * xmlElement, float * value)
 		{
@@ -130,7 +145,7 @@ namespace LazyXML
 	};
 
 	template<>
-	struct LazyVarType < double >
+	struct VarType < double >
 	{
 		static void reader(tinyxml2::XMLElement * xmlElement, double * value)
 		{
@@ -146,7 +161,7 @@ namespace LazyXML
 	};
 
 	template<>
-	struct LazyVarType < std::string >
+	struct VarType < std::string >
 	{
 		static void reader(tinyxml2::XMLElement * xmlElement, std::string * value)
 		{
