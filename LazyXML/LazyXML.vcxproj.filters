@@ -2,15 +2,15 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="LazyXML.cpp" />
-    <ClCompile Include="test.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
+    <ClCompile Include="example.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LazyXML.h" />
     <ClInclude Include="tinyxml2.h" />
-    <ClInclude Include="LazyXML_VarTable.h" />
+    <ClInclude Include="LazyXML_Def.h" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="test_config.xml" />
+    <Xml Include="example.xml" />
   </ItemGroup>
 </Project>

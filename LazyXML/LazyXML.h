@@ -1,59 +1,131 @@
+/*
+Bryan B.
+byebyebryan@gmail.com
+
+simple & stupid c++ auto xml serialization based on tinyxml2
+*/
+
 #ifndef _LAZY_XML_H
 #define _LAZY_XML_H
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include <functional>
 #include <assert.h>
 #include "tinyxml2.h"
 
-#define VAR_TABLE_FILE "LazyXML_VarTable.h"
+//************************************
+// Begin class declaration
+//  -declare basic structure for singleton
+//  -declare init()
+//************************************
+#define LAZY_XML_BEGIN_DECLARATION(className) \
+class className : public LazyXML::Base { \
+	private: className() {} \
+	static className * instance; \
+	public: static className * getInstance(); \
+	static void destoryInstance(); \
+	protected: void init() override;
+
+//************************************
+// End class declaration
+//************************************
+#define LAZY_XML_END_DECLARATION };
+
+//************************************
+// Begin class implementation
+//	-implement basic function for singleton
+//	-begin implementation of init()
+//************************************
+#define LAZY_XML_BEGIN_IMPLEMENTATION(className) \
+className * className::instance = nullptr; \
+className * className::getInstance() { \
+	if (!instance) {instance = new className(); instance->init();} \
+	return instance; \
+} \
+void className::destoryInstance() { \
+	if (instance) {delete instance; instance = nullptr;} \
+} \
+void className::init() {
+
+//************************************
+// End class implementation
+//************************************
+#define LAZY_XML_END_IMPLEMENTATION }
 
 namespace LazyXML
 {
 	class Base
 	{
+	protected:
+		//************************************
+		// map of var name to reading/writing functions
+		//  -function should be already binded to storage of var
+		//************************************
+		std::unordered_map<std::string, std::function<void(tinyxml2::XMLElement *)>> readingFuncs;
+		std::unordered_map<std::string, std::function<void(tinyxml2::XMLElement *)>> writingFuncs;
 
-#define LAZY_XML_VAR(varType, varName) \
-	private: varType varName; \
-	public: const varType & get_##varName() const {return varName;} \
-	void set_##varName(const varType & value) {varName = value;}
-#include VAR_TABLE_FILE
-#undef LAZY_XML_VAR
+		//************************************
+		// FullName:  LazyXML::Base::init
+		// Access:    virtual protected 
+		// Returns:   void
+		//
+		// Summary:   populate read/write function maps
+		//************************************
+		virtual void init() = 0;
 
-	private:
-		static std::map<std::string, std::function<void(tinyxml2::XMLElement *)>> readingFuncs;
-		static std::map<std::string, std::function<void(tinyxml2::XMLElement *)>> writingFuncs;
-		
 	public:
-		void init();
 
+		//************************************
+		// FullName:  LazyXML::Base::readFromFile
+		// Access:    public 
+		// Returns:   void
+		// Parameter: const std::string & fileName
+		//
+		// Summary:   read from file
+		//************************************
 		void readFromFile(const std::string & fileName);
+
+		//************************************
+		// FullName:  LazyXML::Base::readFromBuffer
+		// Access:    public 
+		// Returns:   void
+		// Parameter: const std::string & buffer
+		//
+		// Summary:   read from buffer
+		//************************************
 		void readFromBuffer(const std::string & buffer);
 		
+		//************************************
+		// FullName:  LazyXML::Base::writeToBuffer
+		// Access:    public 
+		// Returns:   void
+		// Parameter: std::string & buffer
+		//
+		// Summary:   write to buffer
+		//************************************
 		void writeToBuffer(std::string & buffer);
+
+
+		//************************************
+		// FullName:  LazyXML::Base::writeToFile
+		// Access:    public 
+		// Returns:   void
+		// Parameter: const std::string & fileName
+		//
+		// Summary:   write to file
+		//************************************
 		void writeToFile(const std::string & fileName);
 	};
 
-	class Singleton : public Base
-	{
-		Singleton() {}
-		static Singleton * instance;
-	public:
-		static Singleton * getInstance()
-		{
-			if (!instance)
-			{
-				instance = new Singleton();
-				instance->init();
-			}
-			return instance;
-		}
-	};
-
+	//************************************
+	// container struct to provide read/write function for generic type T
+	//  -default implementation block execution
+	//  -specialize T to override
+	//************************************
 	template<typename T>
 	struct VarType
 	{
@@ -63,13 +135,17 @@ namespace LazyXML
 			assert(false);
 		}
 
-		static void writer(tinyxml2::XMLElement * xmlElement, const T & value)
+		static void writer(tinyxml2::XMLElement * xmlElement, const std::string & name, const T & value)
 		{
 			std::cerr << "missing XML writing function for value type : " << typeid(T).name() << std::endl;
 			assert(false);
 		}
 	};
 
+	//************************************
+	// partially specialized read/write for container type std::vector<T>
+	//  -calls fully specialized read/write for type T
+	//************************************
 	template<typename T>
 	struct VarType < std::vector<T> >
 	{
@@ -96,6 +172,9 @@ namespace LazyXML
 		}
 	};
 
+	//************************************
+	// fully specialized read/write for bool
+	//************************************
 	template<>
 	struct VarType < bool >
 	{
@@ -112,6 +191,9 @@ namespace LazyXML
 		}
 	};
 
+	//************************************
+	// fully specialized read/write for int
+	//************************************
 	template<>
 	struct VarType < int >
 	{
@@ -128,6 +210,9 @@ namespace LazyXML
 		}
 	};
 
+	//************************************
+	// fully specialized read/write for float
+	//************************************
 	template<>
 	struct VarType < float >
 	{
@@ -144,6 +229,9 @@ namespace LazyXML
 		}
 	};
 
+	//************************************
+	// fully specialized read/write for double
+	//************************************
 	template<>
 	struct VarType < double >
 	{
@@ -160,6 +248,9 @@ namespace LazyXML
 		}
 	};
 
+	//************************************
+	// fully specialized read/write for std::string
+	//************************************
 	template<>
 	struct VarType < std::string >
 	{

@@ -2,18 +2,6 @@
 
 using namespace tinyxml2;
 
-std::map<std::string, std::function<void(tinyxml2::XMLElement *)>> LazyXML::Base::readingFuncs;
-std::map<std::string, std::function<void(tinyxml2::XMLElement *)>> LazyXML::Base::writingFuncs;
-
-void LazyXML::Base::init()
-{
-#define LAZY_XML_VAR(varType, varName) \
-	readingFuncs[#varName] = std::bind(&VarType<varType>::reader, std::placeholders::_1, &varName); \
-	writingFuncs[#varName] = std::bind(&VarType<varType>::writer, std::placeholders::_1, #varName, std::cref(varName));
-#include VAR_TABLE_FILE
-#undef LAZY_XML_VAR
-}
-
 void LazyXML::Base::readFromFile(const std::string & fileName)
 {
 	std::ifstream fileStream(fileName);
@@ -64,5 +52,3 @@ void LazyXML::Base::writeToFile(const std::string & fileName)
 	std::ofstream fileStream(fileName);
 	fileStream << buffer;
 }
-
-LazyXML::Singleton * LazyXML::Singleton::instance = nullptr;

@@ -77,16 +77,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="LazyXML.cpp" />
-    <ClCompile Include="test.cpp" />
+    <ClCompile Include="example.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LazyXML.h" />
-    <ClInclude Include="LazyXML_VarTable.h" />
+    <ClInclude Include="LazyXML_Def.h" />
     <ClInclude Include="tinyxml2.h" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="test_config.xml" />
+    <Xml Include="example.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
