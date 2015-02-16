@@ -17,18 +17,18 @@ simple & stupid c++ auto xml serialization based on tinyxml2
 #include <assert.h>
 #include "tinyxml2.h"
 
-#define LAZY_XML_VAR(var_class, var_type, var_name) \
-	private: class LazyXML_##var_name { \
+#define LAZY_XML_VAR(var_type, var_name) \
+	private: template <typename T0> class LazyXML_##var_name { \
 	public: \
 		std::string name_; \
 		var_type value_; \
 		LazyXML_##var_name () : name_(#var_name) { \
 			value_ = var_type(); \
-			var_class::reading_funcs()[#var_name] = std::bind(&var_class::VarType<var_type>::reader, std::placeholders::_1, &value_); \
-			var_class::writing_funcs()[#var_name] = std::bind(&var_class::VarType<var_type>::writer, std::placeholders::_1, #var_name, std::cref(value_)); \
+			T0::reading_funcs()[#var_name] = std::bind(&T0::VarType<var_type>::reader, std::placeholders::_1, &value_); \
+			T0::writing_funcs()[#var_name] = std::bind(&T0::VarType<var_type>::writer, std::placeholders::_1, #var_name, std::cref(value_)); \
 		} \
 	}; \
-	private: LazyXML_##var_name var_name##_; \
+	private: LazyXML_##var_name<LayzXMLClass> var_name##_; \
 	public: var_type var_name() {return var_name##_.value_;} \
 	public: void set_##var_name(const var_type & value) {var_name##_.value_ = value;}
 
@@ -36,13 +36,15 @@ namespace lazyxml {
 	using namespace tinyxml2;
 
 	template<typename T>
-	class Base {
+	class LazyXMLBase {
 	public:
 		//singleton implementation
 		static T* GetInstance() {
 			static T* instance = new T();
 			return instance;
 		}
+
+		typedef T LayzXMLClass;
 
 		//stream in from xml
 		void ReadFromFile(const std::string & file_name) {
@@ -224,7 +226,7 @@ namespace lazyxml {
 			}
 		};
 
-		//readingd/writing function maps
+		//reading/writing function maps
 		static std::unordered_map<std::string, std::function<void(tinyxml2::XMLElement *)>> & reading_funcs() {
 			static std::unordered_map<std::string, std::function<void(tinyxml2::XMLElement *)>> funcs;
 			return funcs;

@@ -6,13 +6,13 @@
 #include "LazyXML.h"
 
 //Extend from lazy::Base class
-class ExampleXML : public lazyxml::Base < ExampleXML > {
+class ExampleXML : public lazyxml::LazyXMLBase < ExampleXML > {
 	//List variables
-	LAZY_XML_VAR(ExampleXML, bool, TestVar0)
-	LAZY_XML_VAR(ExampleXML, int, TestVar1)
-	LAZY_XML_VAR(ExampleXML, float, TestVar2)
-	LAZY_XML_VAR(ExampleXML, double, TestVar3)
-	LAZY_XML_VAR(ExampleXML, std::vector<int>, TestVar4)
+	LAZY_XML_VAR(bool, TestVar0)
+	LAZY_XML_VAR(int, TestVar1)
+	LAZY_XML_VAR(float, TestVar2)
+	LAZY_XML_VAR(double, TestVar3)
+	LAZY_XML_VAR(std::vector<int>, TestVar4)
 };
 
 #include <iostream>
